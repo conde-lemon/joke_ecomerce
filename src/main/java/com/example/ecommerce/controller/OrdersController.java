@@ -23,6 +23,7 @@ public class OrdersController {
     private final OrderService orderService;
     private final PedidoRepository pedidoRepository;
 
+    // Este es el constructor original, sin el InvoiceService
     public OrdersController(OrderService orderService, PedidoRepository pedidoRepository) {
         this.orderService = orderService;
         this.pedidoRepository = pedidoRepository;
@@ -79,7 +80,7 @@ public class OrdersController {
     public String orderConfirmation(@RequestParam("orderId") Long orderId, Model model) {
         model.addAttribute("orderId", orderId);
         // --- CORRECCIÓN ---
-        // El archivo se llama 'confirmation.html', por lo que el nombre de la vista es 'confirmation'.
+        // Apuntamos a "confirmation" para que coincida con confirmation.html
         return "confirmation";
     }
 }

@@ -1,0 +1,272 @@
+/* ===================================
+   VARIABLES DE COLOR GLOBALES
+   =================================== */
+:root {
+  /* Colores principales */
+  --color-primary: #FFD700;      /* Amarillo dorado */
+  --color-primary-dark: #FFC700; /* Amarillo oscuro */
+  --color-primary-light: #FFE44D; /* Amarillo claro */
+
+  --color-secondary: #1E3A8A;    /* Azul oscuro */
+  --color-secondary-dark: #1E40AF; /* Azul más oscuro */
+  --color-secondary-light: #3B82F6; /* Azul claro */
+
+  --color-dark: #000000;         /* Negro */
+  --color-dark-lighter: #1a1a1a; /* Negro más claro */
+  --color-dark-light: #333333;   /* Gris oscuro */
+
+  /* Colores de texto */
+  --text-on-dark: #ffffff;
+  --text-on-light: #000000;
+  --text-on-primary: #000000;
+  --text-on-secondary: #ffffff;
+
+  /* Colores de estado */
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-info: #3B82F6;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* ===================================
+   BOTONES PERSONALIZADOS
+   =================================== */
+
+/* Botón Primario (Amarillo) */
+.btn-custom-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--text-on-primary) !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-custom-primary:hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--text-on-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-custom-primary:active,
+.btn-custom-primary:focus {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.5);
+}
+
+/* Botón Secundario (Azul) */
+.btn-custom-secondary {
+  background-color: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+  color: var(--text-on-secondary) !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-custom-secondary:hover {
+  background-color: var(--color-secondary-light) !important;
+  border-color: var(--color-secondary-light) !important;
+  color: var(--text-on-secondary) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-custom-secondary:active,
+.btn-custom-secondary:focus {
+  background-color: var(--color-secondary-dark) !important;
+  border-color: var(--color-secondary-dark) !important;
+  box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.5);
+}
+
+/* Botón Dark (Negro) */
+.btn-custom-dark {
+  background-color: var(--color-dark) !important;
+  border-color: var(--color-dark) !important;
+  color: var(--text-on-dark) !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-custom-dark:hover {
+  background-color: var(--color-dark-light) !important;
+  border-color: var(--color-dark-light) !important;
+  color: var(--text-on-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-custom-dark:active,
+.btn-custom-dark:focus {
+  background-color: var(--color-dark-lighter) !important;
+  border-color: var(--color-dark-lighter) !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.5);
+}
+
+/* Botones Outline */
+.btn-outline-custom-primary {
+  border: 2px solid var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background-color: transparent !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-custom-primary:hover {
+  background-color: var(--color-primary) !important;
+  color: var(--text-on-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline-custom-secondary {
+  border: 2px solid var(--color-secondary) !important;
+  color: var(--color-secondary) !important;
+  background-color: transparent !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-custom-secondary:hover {
+  background-color: var(--color-secondary) !important;
+  color: var(--text-on-secondary) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline-custom-dark {
+  border: 2px solid var(--color-dark) !important;
+  color: var(--color-dark) !important;
+  background-color: transparent !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-custom-dark:hover {
+  background-color: var(--color-dark) !important;
+  color: var(--text-on-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===================================
+   BADGES Y TAGS
+   =================================== */
+.badge-custom-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--text-on-primary) !important;
+}
+
+.badge-custom-secondary {
+  background-color: var(--color-secondary) !important;
+  color: var(--text-on-secondary) !important;
+}
+
+.badge-custom-dark {
+  background-color: var(--color-dark) !important;
+  color: var(--text-on-dark) !important;
+}
+
+/* ===================================
+   BACKGROUNDS
+   =================================== */
+.bg-custom-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--text-on-primary) !important;
+}
+
+.bg-custom-secondary {
+  background-color: var(--color-secondary) !important;
+  color: var(--text-on-secondary) !important;
+}
+
+.bg-custom-dark {
+  background-color: var(--color-dark) !important;
+  color: var(--text-on-dark) !important;
+}
+
+/* ===================================
+   TEXTOS
+   =================================== */
+.text-custom-primary {
+  color: var(--color-primary) !important;
+}
+
+.text-custom-secondary {
+  color: var(--color-secondary) !important;
+}
+
+.text-custom-dark {
+  color: var(--color-dark) !important;
+}
+
+/* ===================================
+   CARDS
+   =================================== */
+.card-custom {
+  border: 2px solid var(--color-dark);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.card-custom:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.card-header-custom-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--text-on-primary) !important;
+  border-bottom: 2px solid var(--color-dark);
+  font-weight: 700;
+}
+
+.card-header-custom-secondary {
+  background-color: var(--color-secondary) !important;
+  color: var(--text-on-secondary) !important;
+  border-bottom: 2px solid var(--color-dark);
+  font-weight: 700;
+}
+
+.card-header-custom-dark {
+  background-color: var(--color-dark) !important;
+  color: var(--text-on-dark) !important;
+  border-bottom: 2px solid var(--color-primary);
+  font-weight: 700;
+}
+
+/* ===================================
+   FORMS
+   =================================== */
+.form-control:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25) !important;
+}
+
+.form-select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25) !important;
+}
+
+/* ===================================
+   UTILIDADES
+   =================================== */
+.border-custom-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.border-custom-secondary {
+  border-color: var(--color-secondary) !important;
+}
+
+.border-custom-dark {
+  border-color: var(--color-dark) !important;
+}
+

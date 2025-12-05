@@ -9,8 +9,20 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <main class="container my-4">
-  <h2>Gestión de Usuarios</h2>
-  <table class="table table-bordered table-striped mt-3">
+  <!-- ================================================== -->
+  <!-- CORRECCIÓN: Contenedor para título y botón -->
+  <!-- ================================================== -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Gestión de Usuarios</h2>
+    <a class="btn btn-success" th:href="@{/admin/users/new}">
+      <i class="bi bi-plus-circle"></i> Agregar Usuario
+    </a>
+  </div>
+  <!-- ================================================== -->
+
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+  <table class="table table-bordered table-striped">
     <thead class="table-dark">
     <tr>
       <th>Correo (ID)</th>
@@ -21,12 +33,10 @@
     </thead>
     <tbody>
     <tr th:each="u : ${usuarios}">
-      <!-- CORRECCIÓN: Usar los campos correctos de la entidad Usuario -->
       <td th:text="${u.correo}"></td>
       <td th:text="${u.nombre}"></td>
       <td th:text="${u.roles}"></td>
       <td>
-        <!-- El ID para la URL es el correo -->
         <a class="btn btn-sm btn-primary" th:href="@{'/admin/users/edit/' + ${u.correo}}">Editar</a>
         <a class="btn btn-sm btn-danger" th:href="@{'/admin/users/delete/' + ${u.correo}}">Eliminar</a>
       </td>

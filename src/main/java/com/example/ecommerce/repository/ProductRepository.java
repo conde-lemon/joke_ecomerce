@@ -22,4 +22,28 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(:max IS NULL OR p.precio <= :max) " +
             "ORDER BY p.nombre ASC")
     List<Product> search(@Param("q") String q, @Param("min") BigDecimal min, @Param("max") BigDecimal max);
+
+    /**
+     * Busca productos por nombre que contenga el texto especificado (case insensitive).
+     * Método derivado de Spring Data JPA.
+     */
+    List<Product> findByNombreContainingIgnoreCase(String nombre);
+
+    /**
+     * Busca todos los productos activos.
+     * Método derivado de Spring Data JPA.
+     */
+    List<Product> findByActivoTrue();
+
+    /**
+     * Busca todos los productos inactivos.
+     * Método derivado de Spring Data JPA.
+     */
+    List<Product> findByActivoFalse();
+
+    /**
+     * Busca productos por estado activo.
+     * Método derivado de Spring Data JPA.
+     */
+    List<Product> findByActivo(boolean activo);
 }

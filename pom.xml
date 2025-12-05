@@ -12,12 +12,9 @@
     <java.version>21</java.version>
     <spring-boot.version>3.3.3</spring-boot.version>
     <maven.compiler.release>21</maven.compiler.release>
+    <itext.version>8.0.4</itext.version>
   </properties>
 
-  <!--
-    Esta sección es para gestionar las versiones de las dependencias de Spring Boot.
-    Es correcto tener el 'spring-boot-dependencies' aquí.
-  -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -30,10 +27,6 @@
     </dependencies>
   </dependencyManagement>
 
-  <!--
-    Esta es la sección principal donde se declaran TODAS las dependencias
-    que tu proyecto necesita para compilar y ejecutarse.
-  -->
   <dependencies>
     <!-- Dependencias Web y de Plantillas -->
     <dependency>
@@ -45,7 +38,7 @@
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
-    <!-- CORRECCIÓN: Dependencias de Spring Security movidas aquí -->
+    <!-- Dependencias de Spring Security -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
@@ -54,7 +47,6 @@
       <groupId>org.thymeleaf.extras</groupId>
       <artifactId>thymeleaf-extras-springsecurity6</artifactId>
     </dependency>
-    <!-- FIN DE LA CORRECCIÓN -->
 
     <!-- Dependencias de Datos y Base de Datos -->
     <dependency>
@@ -84,10 +76,41 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Dependencias para la generación de PDF con JasperReports -->
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports</artifactId>
+      <version>6.21.3</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-fonts</artifactId>
+      <version>6.21.3</version>
+    </dependency>
+
+    <!-- Apache POI para generar reportes Excel -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>5.2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.2.5</version>
+    </dependency>
+
     <!-- Dependencia para Tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- H2 en memoria para tests -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -102,7 +125,82 @@
         <version>3.11.0</version>
         <configuration>
           <release>${maven.compiler.release}</release>
+          <parameters>true</parameters> <!-- Habilita -parameters para @RequestParam -->
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
+      </plugin>
+
+      <!-- Frontend Maven Plugin - Ejecuta npm install y npm run build -->
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.15.0</version>
+        <configuration>
+          <workingDirectory>frontend</workingDirectory>
+          <installDirectory>target</installDirectory>
+        </configuration>
+        <executions>
+          <!-- Instalar Node.js y npm -->
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <configuration>
+              <nodeVersion>v20.11.0</nodeVersion>
+              <npmVersion>10.2.4</npmVersion>
+            </configuration>
+          </execution>
+
+          <!-- Ejecutar npm install -->
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+
+          <!-- Ejecutar npm run build -->
+          <execution>
+            <id>npm run build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run build</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Copiar el build de Vue al directorio static de Spring Boot -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-vue-build</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>frontend/dist</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Plugin de Spring Boot con versión definida -->

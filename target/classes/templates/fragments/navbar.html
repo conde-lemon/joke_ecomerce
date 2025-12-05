@@ -20,13 +20,17 @@
           <li class="nav-item"><a class="nav-link" th:href="@{/orders}">Mis Pedidos</a></li>
         </th:block>
 
-        <!-- Menú de Administración (solo para rol ADMIN) -->
+        <!-- ================================================== -->
+        <!-- CORRECCIÓN: Menú de Administración mejorado -->
+        <!-- ================================================== -->
         <th:block sec:authorize="hasRole('ADMIN')">
           <li class="nav-item dropdown">
+            <!-- Este enlace ahora solo abre el menú desplegable. El href="#" es una convención. -->
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Administración
             </a>
             <ul class="dropdown-menu">
+              <!-- Se añade el enlace al Panel Principal -->
               <li><a class="dropdown-item" th:href="@{/admin}">Panel Principal</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" th:href="@{/admin/products}">Gestionar Productos</a></li>
@@ -34,10 +38,11 @@
             </ul>
           </li>
         </th:block>
+        <!-- ================================================== -->
+
       </ul>
 
       <!-- SECCIÓN DERECHA: CAMBIA SEGÚN LA AUTENTICACIÓN -->
-      <!-- (El resto del navbar para login/logout/carrito se mantiene igual) -->
       <div sec:authorize="isAnonymous()">
         <a class="btn btn-outline-primary" th:href="@{/login}">
           <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión

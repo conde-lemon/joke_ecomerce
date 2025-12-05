@@ -4,6 +4,22 @@
   <meta charset="UTF-8">
   <title>Carrito de Compras</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .qty-input {
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .qty-input.updating {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .qty-input.updated {
+      border-color: #198754;
+      box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    }
+    .btn-qty:hover {
+      background-color: #f8f9fa;
+    }
+  </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 <div data-th-replace="~{fragments/navbar :: navbar}"></div>
@@ -38,19 +54,19 @@
         <td>
           <form data-th-action="@{'/cart/update/' + ${item.product.id}}"
                 method="post"
-                class="d-flex align-items-center gap-2">
+                class="auto-submit-form">
 
-            <div class="input-group qty-group">
+            <div class="input-group qty-group" style="max-width: 200px;">
               <button class="btn btn-outline-secondary btn-qty" type="button" data-delta="-1" aria-label="Restar">−</button>
               <input type="text"
                      name="qty"
                      inputmode="numeric"
                      pattern="[0-9]*"
                      class="form-control qty-input text-center"
-                     th:value="${item.qty}">
+                     th:value="${item.quantity}"
+                     data-original-value="${item.quantity}">
               <button class="btn btn-outline-secondary btn-qty" type="button" data-delta="1" aria-label="Sumar">＋</button>
             </div>
-            <button type="submit" class="btn btn-sm btn-outline-primary">Actualizar</button>
           </form>
         </td>
         <td class="text-end">S/ <span data-th-text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 2, 'POINT')}">0.00</span></td>
@@ -87,23 +103,85 @@
 <div data-th-replace="~{fragments/footer :: footer}"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  // Mapa para guardar los timeouts de debounce
+  const updateTimeouts = new Map();
+
+  // Función para enviar el formulario automáticamente
+  function autoSubmitForm(input) {
+    const form = input.closest('.auto-submit-form');
+    const originalValue = input.dataset.originalValue;
+    const currentValue = input.value;
+
+    // Solo enviar si el valor cambió y es válido
+    if (currentValue !== originalValue && currentValue !== '' && parseInt(currentValue) > 0) {
+      // Limpiar timeout anterior si existe
+      if (updateTimeouts.has(input)) {
+        clearTimeout(updateTimeouts.get(input));
+      }
+
+      // Indicador visual de que se está actualizando
+      input.classList.remove('updated');
+      input.classList.add('updating');
+
+      // Crear nuevo timeout (debounce de 800ms)
+      const timeoutId = setTimeout(() => {
+        form.submit();
+      }, 800);
+
+      updateTimeouts.set(input, timeoutId);
+    }
+  }
+
+  // Configurar inputs de cantidad
   document.querySelectorAll('.qty-input').forEach(inp => {
+    // Validar solo números
     inp.addEventListener('input', () => {
       const m = inp.value.match(/\d+/);
       inp.value = m ? m[0] : '';
+
+      // Disparar actualización automática si el valor cambió
+      if (inp.value !== '' && inp.value !== '0') {
+        autoSubmitForm(inp);
+      }
     });
+
+    // Al perder el foco, validar y enviar
     inp.addEventListener('blur', () => {
-      if (inp.value === '') inp.value = '0';
+      if (inp.value === '' || inp.value === '0') {
+        inp.value = '1'; // Cantidad mínima 1
+      }
+      autoSubmitForm(inp);
+    });
+
+    // Detectar Enter para enviar inmediatamente
+    inp.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (inp.value === '' || inp.value === '0') {
+          inp.value = '1';
+        }
+        // Cancelar debounce y enviar inmediatamente
+        if (updateTimeouts.has(inp)) {
+          clearTimeout(updateTimeouts.get(inp));
+        }
+        inp.classList.remove('updating');
+        inp.classList.add('updated');
+        inp.closest('.auto-submit-form').submit();
+      }
     });
   });
 
+  // Configurar botones + y -
   document.querySelectorAll('.btn-qty').forEach(btn => {
     btn.addEventListener('click', () => {
       const input = btn.closest('.qty-group').querySelector('.qty-input');
       const delta = parseInt(btn.dataset.delta || '0', 10);
-      const current = parseInt(input.value || '0', 10);
-      const next = Math.max(0, current + delta);
+      const current = parseInt(input.value || '1', 10);
+      const next = Math.max(1, current + delta); // Mínimo 1
       input.value = String(next);
+
+      // Enviar formulario automáticamente después del click
+      autoSubmitForm(input);
     });
   });
 </script>

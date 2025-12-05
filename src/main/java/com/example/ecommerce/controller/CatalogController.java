@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class CatalogController {
@@ -48,12 +47,5 @@ public class CatalogController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("product", p);
         return "product-detail";
-    }
-
-    @GetMapping("/api/products/{id}")
-    @ResponseBody
-    public Product productPreview(@PathVariable("id") Long id) {
-        return catalogService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }

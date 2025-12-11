@@ -60,6 +60,24 @@
                             <div class="text-danger small" th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}"></div>
                         </div>
 
+                        <!-- Toggle ADMIN amigable -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="isAdmin"
+                                   th:checked="${usuario.roles != null and #strings.contains(usuario.roles, 'ADMIN')}"
+                                   onchange="
+                                     const rolesInput = document.getElementById('roles');
+                                     const roles = rolesInput.value ? rolesInput.value.split(',').map(r=>r.trim()).filter(Boolean) : [];
+                                     if (this.checked && !roles.includes('ADMIN')) { roles.push('ADMIN'); }
+                                     if (!this.checked) {
+                                       const filtered = roles.filter(r => r !== 'ADMIN');
+                                       rolesInput.value = filtered.length ? filtered.join(',') : 'USER';
+                                       return;
+                                     }
+                                     rolesInput.value = roles.join(',');
+                                   ">
+                            <label class="form-check-label" for="isAdmin">Conceder rol ADMIN</label>
+                        </div>
+
                         <div class="d-flex justify-content-end gap-2">
                             <a th:href="@{/admin/users}" class="btn btn-secondary">Cancelar</a>
                             <button type="submit" class="btn btn-primary">Guardar Usuario</button>

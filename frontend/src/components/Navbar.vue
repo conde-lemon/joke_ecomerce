@@ -56,6 +56,12 @@
                   <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
                 </router-link>
               </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <router-link class="dropdown-item" to="/admin/orders">
+                  <i class="bi bi-receipt me-2"></i>Gestión de Pedidos
+                </router-link>
+              </li>
             </ul>
           </li>
         </ul>
@@ -197,4 +203,3 @@ export default {
   font-weight: bold;
 }
 </style>
-

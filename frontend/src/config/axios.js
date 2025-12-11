@@ -3,6 +3,7 @@ import axios from 'axios'
 const instance = axios.create({
   baseURL: 'http://localhost:8080',
   withCredentials: true,
+  timeout: 30000, // 30 segundos
   headers: {
     'Content-Type': 'application/json'
   }
@@ -31,6 +32,9 @@ instance.interceptors.response.use(
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
+    } else if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      console.error('Error de conexión:', error.message)
+      // Puedes mostrar un mensaje al usuario aquí
     }
     return Promise.reject(error)
   }

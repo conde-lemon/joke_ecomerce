@@ -59,7 +59,8 @@
             </div>
           </div>
           <div class="card-footer bg-warning bg-opacity-50 border-0">
-            <router-link to="/admin/orders" class="text-dark text-decoration-none">
+            <!-- Ajuste: evitar enlace a ruta inexistente -->
+            <router-link to="/admin" class="text-dark text-decoration-none">
               Ver todos <i class="bi bi-arrow-right"></i>
             </router-link>
           </div>
@@ -235,18 +236,26 @@ export default {
         const usersRes = await axios.get('/api/users')
         stats.value.totalUsers = usersRes.data.length
 
-        // Obtener pedidos
-        const ordersRes = await axios.get('/api/orders/all')
+        // Obtener pedidos con fallback si /api/orders/all falla
+        let ordersRes
+        try {
+          ordersRes = await axios.get('/api/orders/all')
+        } catch (e) {
+          console.warn('Fallo /api/orders/all, intentando /api/orders', e)
+          ordersRes = await axios.get('/api/orders')
+        }
+
         stats.value.totalOrders = ordersRes.data.length
         stats.value.totalSales = ordersRes.data.reduce((sum, order) => sum + parseFloat(order.total || 0), 0)
 
-        // Últimos 5 pedidos
         recentOrders.value = ordersRes.data
           .sort((a, b) => new Date(b.fechaPedido) - new Date(a.fechaPedido))
           .slice(0, 5)
 
       } catch (error) {
         console.error('Error al cargar estadísticas:', error)
+        // Aviso más amigable en caso de fallo general
+        alert('No se pudieron cargar todas las estadísticas. Intenta nuevamente.')
       }
     }
 
@@ -364,4 +373,3 @@ export default {
   font-size: 3rem !important;
 }
 </style>
-

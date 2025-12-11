@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,7 +22,9 @@ public class AdminController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AdminController(ProductRepository productRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public AdminController(ProductRepository productRepository,
+                           UsuarioRepository usuarioRepository,
+                           PasswordEncoder passwordEncoder) {
         this.productRepository = productRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
@@ -34,7 +35,7 @@ public class AdminController {
         return "admin-dashboard";
     }
 
-    // --- GESTIÓN DE PRODUCTOS (sin cambios) ---
+    // --- GESTIÓN DE PRODUCTOS ---
     @GetMapping("/products")
     public String showProductList(Model model) {
         List<Product> products = productRepository.findAll();
@@ -69,7 +70,6 @@ public class AdminController {
     }
 
     // --- GESTIÓN DE USUARIOS ---
-
     @GetMapping("/users")
     public String showUserList(Model model) {
         List<Usuario> usuarios = usuarioRepository.findAll();
@@ -77,32 +77,22 @@ public class AdminController {
         return "admin-users";
     }
 
-    // --- MÉTODOS PARA CREAR Y EDITAR USUARIOS ---
-
     @GetMapping("/users/new")
     public String showAdminCreateUserForm(Model model) {
         model.addAttribute("usuario", new Usuario());
         return "admin/user-form";
     }
 
-    /**
-     * CORRECCIÓN: Añadimos el método para manejar la edición de usuarios.
-     * La expresión regular ':.+' es necesaria para que Spring no trunque el email en el último punto.
-     */
     @GetMapping("/users/edit/{email:.+}")
     public String showAdminEditUserForm(@PathVariable("email") String email, Model model) {
         Usuario usuario = usuarioRepository.findById(email)
                 .orElseThrow(() -> new IllegalArgumentException("Email de usuario inválido: " + email));
-
         // Se envía la contraseña vacía al formulario por seguridad.
         usuario.setContrasena("");
         model.addAttribute("usuario", usuario);
         return "admin/user-form";
     }
 
-    /**
-     * MEJORA: El método de guardado ahora maneja tanto la creación como la edición.
-     */
     @PostMapping("/users/save")
     public String saveUserByAdmin(@Valid @ModelAttribute("usuario") Usuario usuario,
                                   BindingResult result,
@@ -145,4 +135,6 @@ public class AdminController {
         ra.addFlashAttribute("successMessage", "Usuario '" + usuario.getNombre() + "' guardado con éxito.");
         return "redirect:/admin/users";
     }
+
 }
+

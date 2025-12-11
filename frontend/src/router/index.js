@@ -13,12 +13,16 @@ import Register from '../views/Register.vue'
 import Orders from '../views/Orders.vue'
 import UserProfile from '../views/UserProfile.vue'
 import TestConnection from '../views/TestConnection.vue'
+import TestDatabase from '../views/TestDatabase.vue'
 import TestAuth from '../views/TestAuth.vue'
+import TestPanel from '../views/TestPanel.vue'
+import TestAPI from '../views/TestAPI.vue'
 
 // Admin
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
 import AdminProducts from '../views/admin/AdminProducts.vue'
 import AdminUsers from '../views/admin/AdminUsers.vue'
+import AdminOrders from '../views/admin/AdminOrders.vue'
 import ProductForm from '../views/admin/ProductForm.vue'
 import UserForm from '../views/admin/UserForm.vue'
 
@@ -83,9 +87,24 @@ const routes = [
     component: TestConnection
   },
   {
+    path: '/test-database',
+    name: 'TestDatabase',
+    component: TestDatabase
+  },
+  {
     path: '/test-auth',
     name: 'TestAuth',
     component: TestAuth
+  },
+  {
+    path: '/test-panel',
+    name: 'TestPanel',
+    component: TestPanel
+  },
+  {
+    path: '/test-api',
+    name: 'TestAPI',
+    component: TestAPI
   },
   {
     path: '/admin',
@@ -127,6 +146,12 @@ const routes = [
     path: '/admin/users/edit/:id',
     name: 'EditUser',
     component: UserForm,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/orders',
+    name: 'AdminOrders',
+    component: AdminOrders,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]

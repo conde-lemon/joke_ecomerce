@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,27 +31,70 @@ public class ProductRestController {
     @ResponseBody
     public List<Product> getAllProducts(
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "limit", required = false) Integer limit
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(value = "onlyInStock", required = false) Boolean onlyInStock
     ) {
-        List<Product> products;
+        List<Product> products = productRepository.findAll();
 
-        if (search != null && !search.isEmpty()) {
-            products = productRepository.findByNombreContainingIgnoreCase(search);
-        } else {
-            products = productRepository.findAll();
-        }
-
-        // Filtrar solo productos activos para usuarios normales
+        // Filtrar solo productos activos
         products = products.stream()
                 .filter(Product::isActivo)
                 .collect(Collectors.toList());
+
+        // Aplicar filtros
+        if (search != null && !search.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> p.getNombre().toLowerCase().contains(search.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (minPrice != null) {
+            products = products.stream()
+                    .filter(p -> p.getPrecio().compareTo(minPrice) >= 0)
+                    .collect(Collectors.toList());
+        }
+
+        if (maxPrice != null) {
+            products = products.stream()
+                    .filter(p -> p.getPrecio().compareTo(maxPrice) <= 0)
+                    .collect(Collectors.toList());
+        }
+
+        if (onlyInStock != null && onlyInStock) {
+            products = products.stream()
+                    .filter(p -> p.getStock() > 0)
+                    .collect(Collectors.toList());
+        }
+
+        // Aplicar ordenamiento
+        if (sort != null) {
+            switch (sort) {
+                case "precio_asc":
+                    products.sort(Comparator.comparing(Product::getPrecio));
+                    break;
+                case "precio_desc":
+                    products.sort(Comparator.comparing(Product::getPrecio).reversed());
+                    break;
+                case "nombre_asc":
+                    products.sort(Comparator.comparing(Product::getNombre));
+                    break;
+                case "nombre_desc":
+                    products.sort(Comparator.comparing(Product::getNombre).reversed());
+                    break;
+                case "stock_desc":
+                    products.sort(Comparator.comparing(Product::getStock).reversed());
+                    break;
+            }
+        }
 
         // Limitar resultados si se especifica
         if (limit != null && limit > 0 && limit < products.size()) {
             products = products.subList(0, limit);
         }
 
-        System.out.println(">>> API /api/products devolviendo " + products.size() + " productos");
         return products;
     }
 
@@ -83,13 +128,14 @@ public class ProductRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         return productRepository.findById(id)
                 .map(product -> {
-                    productRepository.delete(product);
-                    return ResponseEntity.ok().<Void>build();
+                    // Soft delete: marcar como inactivo en lugar de borrar físicamente
+                    product.setActivo(false);
+                    productRepository.save(product);
+                    return ResponseEntity.noContent().build();
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 }
-

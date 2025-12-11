@@ -3,23 +3,68 @@
     <h3 class="mb-4">Catálogo de Productos</h3>
 
     <!-- Filtros y búsqueda -->
-    <div class="row mb-4">
-      <div class="col-md-8">
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="form-control"
-          placeholder="Buscar productos..."
-          @input="searchProducts"
-        >
-      </div>
-      <div class="col-md-4">
-        <select v-model="sortBy" class="form-select" @change="fetchProducts">
-          <option value="">Ordenar por...</option>
-          <option value="precio_asc">Precio: Menor a Mayor</option>
-          <option value="precio_desc">Precio: Mayor a Menor</option>
-          <option value="nombre_asc">Nombre: A-Z</option>
-        </select>
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Buscar productos</label>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control"
+              placeholder="Nombre del producto..."
+              @input="searchProducts"
+            >
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Ordenar por</label>
+            <select v-model="sortBy" class="form-select" @change="fetchProducts">
+              <option value="">Seleccionar...</option>
+              <option value="precio_asc">Precio: Menor a Mayor</option>
+              <option value="precio_desc">Precio: Mayor a Menor</option>
+              <option value="nombre_asc">Nombre: A-Z</option>
+              <option value="nombre_desc">Nombre: Z-A</option>
+              <option value="stock_desc">Mayor Stock</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Precio mínimo</label>
+            <input
+              v-model="minPrice"
+              type="number"
+              class="form-control"
+              placeholder="0.00"
+              @input="searchProducts"
+            >
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Precio máximo</label>
+            <input
+              v-model="maxPrice"
+              type="number"
+              class="form-control"
+              placeholder="999.99"
+              @input="searchProducts"
+            >
+          </div>
+          <div class="col-md-1">
+            <label class="form-label">&nbsp;</label>
+            <button @click="clearFilters" class="btn btn-outline-secondary d-block w-100">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-md-3">
+            <div class="form-check">
+              <input v-model="onlyInStock" class="form-check-input" type="checkbox" @change="fetchProducts">
+              <label class="form-check-label">Solo con stock</label>
+            </div>
+          </div>
+          <div class="col-md-9 text-end">
+            <small class="text-muted">{{ products.length }} productos encontrados</small>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -102,6 +147,9 @@ export default {
     const loading = ref(false)
     const searchQuery = ref('')
     const sortBy = ref('')
+    const minPrice = ref('')
+    const maxPrice = ref('')
+    const onlyInStock = ref(false)
 
     const fetchProducts = async () => {
       loading.value = true
@@ -109,6 +157,9 @@ export default {
         const params = {}
         if (searchQuery.value) params.search = searchQuery.value
         if (sortBy.value) params.sort = sortBy.value
+        if (minPrice.value) params.minPrice = minPrice.value
+        if (maxPrice.value) params.maxPrice = maxPrice.value
+        if (onlyInStock.value) params.onlyInStock = true
 
         const response = await axios.get('/api/products', { params })
         products.value = response.data
@@ -117,6 +168,15 @@ export default {
       } finally {
         loading.value = false
       }
+    }
+    
+    const clearFilters = () => {
+      searchQuery.value = ''
+      sortBy.value = ''
+      minPrice.value = ''
+      maxPrice.value = ''
+      onlyInStock.value = false
+      fetchProducts()
     }
 
     let searchTimeout
@@ -147,8 +207,12 @@ export default {
       loading,
       searchQuery,
       sortBy,
+      minPrice,
+      maxPrice,
+      onlyInStock,
       fetchProducts,
       searchProducts,
+      clearFilters,
       addToCart,
       formatPrice,
       truncate

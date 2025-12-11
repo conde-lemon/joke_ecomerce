@@ -1,5 +1,7 @@
 package com.example.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,10 +11,10 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "detalle_pedido")
-// --- MEJORA 1: Reemplazar @Data por anotaciones específicas ---
 @Getter
 @Setter
-@ToString(exclude = {"pedido", "producto"}) // Excluimos las relaciones para evitar bucles
+@ToString(exclude = {"pedido", "producto"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DetallePedido {
 
     @Id
@@ -22,6 +24,7 @@ public class DetallePedido {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pedido")
+    @JsonBackReference
     private Pedido pedido;
 
     @ManyToOne(fetch = FetchType.LAZY)

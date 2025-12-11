@@ -1,5 +1,6 @@
 package com.example.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,12 +10,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-// CORRECCIÓN 1: Apuntamos a la tabla "usuarios" en plural, como debe ser.
-@Table(name = "usuarios")
-// MEJORA: Reemplazamos @Data por anotaciones específicas para evitar problemas con JPA.
+@Table(name = "usuario")
 @Getter
 @Setter
 @ToString
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
 
     @Id

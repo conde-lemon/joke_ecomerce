@@ -2,37 +2,93 @@
   <div class="container-fluid my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2><i class="bi bi-box-seam"></i> Gestión de Productos</h2>
-      <router-link to="/admin/products/new" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Nuevo Producto
-      </router-link>
+      <div>
+        <button @click="descargarReportePDF" class="btn btn-primary me-2">
+          <i class="bi bi-file-pdf"></i> Descargar Reporte PDF
+        </button>
+        <router-link to="/admin/products/new" class="btn btn-success">
+          <i class="bi bi-plus-circle"></i> Nuevo Producto
+        </router-link>
+      </div>
     </div>
 
     <!-- Filtros -->
     <div class="card mb-4">
       <div class="card-body">
-        <div class="row">
-          <div class="col-md-6">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Buscar producto</label>
             <input
               v-model="searchQuery"
               type="text"
               class="form-control"
-              placeholder="Buscar por nombre..."
+              placeholder="Nombre del producto..."
               @input="filterProducts"
             >
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
+            <label class="form-label">Estado</label>
             <select v-model="statusFilter" class="form-select" @change="filterProducts">
-              <option value="">Todos los estados</option>
+              <option value="">Todos</option>
               <option value="true">Activos</option>
               <option value="false">Inactivos</option>
             </select>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
+            <label class="form-label">Stock</label>
             <select v-model="stockFilter" class="form-select" @change="filterProducts">
-              <option value="">Todo el stock</option>
+              <option value="">Todos</option>
               <option value="low">Stock bajo (&lt; 10)</option>
               <option value="out">Sin stock</option>
+              <option value="high">Stock alto (&gt; 50)</option>
             </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Precio mínimo</label>
+            <input
+              v-model="minPrice"
+              type="number"
+              class="form-control"
+              placeholder="0.00"
+              @input="filterProducts"
+            >
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Precio máximo</label>
+            <input
+              v-model="maxPrice"
+              type="number"
+              class="form-control"
+              placeholder="999.99"
+              @input="filterProducts"
+            >
+          </div>
+          <div class="col-md-1">
+            <label class="form-label">&nbsp;</label>
+            <button @click="clearFilters" class="btn btn-outline-secondary d-block w-100" title="Limpiar filtros">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-md-6">
+            <label class="form-label">Ordenar por</label>
+            <select v-model="sortBy" class="form-select" @change="filterProducts">
+              <option value="">Sin ordenar</option>
+              <option value="nombre_asc">Nombre: A-Z</option>
+              <option value="nombre_desc">Nombre: Z-A</option>
+              <option value="precio_asc">Precio: Menor a Mayor</option>
+              <option value="precio_desc">Precio: Mayor a Menor</option>
+              <option value="stock_asc">Stock: Menor a Mayor</option>
+              <option value="stock_desc">Stock: Mayor a Menor</option>
+              <option value="id_desc">Más recientes</option>
+            </select>
+          </div>
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="text-muted">
+              <i class="bi bi-info-circle"></i> 
+              Mostrando {{ paginatedProducts.length }} de {{ filteredProducts.length }} productos
+            </div>
           </div>
         </div>
       </div>
@@ -171,13 +227,16 @@ export default {
     const searchQuery = ref('')
     const statusFilter = ref('')
     const stockFilter = ref('')
+    const minPrice = ref('')
+    const maxPrice = ref('')
+    const sortBy = ref('')
     const currentPage = ref(1)
     const itemsPerPage = 10
 
     const fetchProducts = async () => {
       loading.value = true
       try {
-        const response = await axios.get('/api/products')
+        const response = await axios.get('/api/admin/products')
         products.value = response.data
       } catch (error) {
         console.error('Error al cargar productos:', error)
@@ -188,12 +247,13 @@ export default {
     }
 
     const filteredProducts = computed(() => {
-      let result = products.value
+      let result = [...products.value]
 
       // Filtro por búsqueda
       if (searchQuery.value) {
         result = result.filter(p =>
-          p.nombre.toLowerCase().includes(searchQuery.value.toLowerCase())
+          p.nombre.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          (p.descripcion && p.descripcion.toLowerCase().includes(searchQuery.value.toLowerCase()))
         )
       }
 
@@ -208,6 +268,45 @@ export default {
         result = result.filter(p => p.stock > 0 && p.stock < 10)
       } else if (stockFilter.value === 'out') {
         result = result.filter(p => p.stock === 0)
+      } else if (stockFilter.value === 'high') {
+        result = result.filter(p => p.stock > 50)
+      }
+
+      // Filtro por precio mínimo
+      if (minPrice.value) {
+        result = result.filter(p => parseFloat(p.precio) >= parseFloat(minPrice.value))
+      }
+
+      // Filtro por precio máximo
+      if (maxPrice.value) {
+        result = result.filter(p => parseFloat(p.precio) <= parseFloat(maxPrice.value))
+      }
+
+      // Ordenamiento
+      if (sortBy.value) {
+        switch (sortBy.value) {
+          case 'nombre_asc':
+            result.sort((a, b) => a.nombre.localeCompare(b.nombre))
+            break
+          case 'nombre_desc':
+            result.sort((a, b) => b.nombre.localeCompare(a.nombre))
+            break
+          case 'precio_asc':
+            result.sort((a, b) => parseFloat(a.precio) - parseFloat(b.precio))
+            break
+          case 'precio_desc':
+            result.sort((a, b) => parseFloat(b.precio) - parseFloat(a.precio))
+            break
+          case 'stock_asc':
+            result.sort((a, b) => a.stock - b.stock)
+            break
+          case 'stock_desc':
+            result.sort((a, b) => b.stock - a.stock)
+            break
+          case 'id_desc':
+            result.sort((a, b) => b.id - a.id)
+            break
+        }
       }
 
       return result
@@ -226,13 +325,23 @@ export default {
     const filterProducts = () => {
       currentPage.value = 1
     }
+    
+    const clearFilters = () => {
+      searchQuery.value = ''
+      statusFilter.value = ''
+      stockFilter.value = ''
+      minPrice.value = ''
+      maxPrice.value = ''
+      sortBy.value = ''
+      currentPage.value = 1
+    }
 
     const toggleStatus = async (product) => {
       if (!confirm(`¿Cambiar estado de "${product.nombre}"?`)) return
 
       try {
         const updated = { ...product, activo: !product.activo }
-        await axios.put(`/api/products/${product.id}`, updated)
+        await axios.put(`/api/admin/products/${product.id}`, updated)
         product.activo = !product.activo
         alert('Estado actualizado correctamente')
       } catch (error) {
@@ -245,12 +354,33 @@ export default {
       if (!confirm(`¿Eliminar el producto "${product.nombre}"? Esta acción no se puede deshacer.`)) return
 
       try {
-        await axios.delete(`/api/products/${product.id}`)
+        await axios.delete(`/api/admin/products/${product.id}`)
         products.value = products.value.filter(p => p.id !== product.id)
         alert('Producto eliminado correctamente')
       } catch (error) {
         console.error('Error al eliminar producto:', error)
         alert('Error al eliminar producto')
+      }
+    }
+
+    const descargarReportePDF = async () => {
+      try {
+        const response = await axios.get('/api/reports/productos/pdf', {
+          responseType: 'blob'
+        })
+
+        // Crear un enlace temporal para descargar el archivo
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'reporte_productos.pdf')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Error al descargar reporte:', error)
+        alert('Error al descargar el reporte PDF')
       }
     }
 
@@ -279,13 +409,18 @@ export default {
       searchQuery,
       statusFilter,
       stockFilter,
+      minPrice,
+      maxPrice,
+      sortBy,
       currentPage,
       filteredProducts,
       paginatedProducts,
       totalPages,
       filterProducts,
+      clearFilters,
       toggleStatus,
       deleteProduct,
+      descargarReportePDF,
       formatPrice,
       truncate,
       getStockBadgeClass

@@ -1,9 +1,8 @@
 package com.example.ecommerce.controller;
 
-import com.example.ecommerce.model.OrderForm;
-import com.example.ecommerce.model.Pedido;
-import com.example.ecommerce.model.Usuario;
-import com.example.ecommerce.repository.PedidoRepository;
+import com.example.ecommerce.dto.PedidoUsuarioDTO;
+import com.example.ecommerce.model.*;
+import com.example.ecommerce.repository.*;
 import com.example.ecommerce.service.CartService;
 import com.example.ecommerce.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +30,46 @@ public class OrderRestController {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private MensajePedidoRepository mensajePedidoRepository;
+
     @GetMapping
-    public ResponseEntity<?> getUserOrders(HttpSession session) {
+    public ResponseEntity<?> getUserOrders(
+            HttpSession session,
+            @RequestParam(value = "email", required = false) String email
+    ) {
         Usuario usuario = (Usuario) session.getAttribute("currentUser");
+        
+        // Si no hay usuario en sesión pero se proporciona email, buscar por email
+        if (usuario == null && email != null) {
+            usuario = usuarioRepository.findByCorreo(email).orElse(null);
+        }
 
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         List<Pedido> pedidos = pedidoRepository.findByUsuarioCorreoOrderByFechaPedidoDesc(usuario.getCorreo());
-        return ResponseEntity.ok(pedidos);
+        
+        // Convertir a DTO con mensajes
+        List<PedidoUsuarioDTO> pedidosDTO = pedidos.stream()
+            .map(this::convertToPedidoUsuarioDTO)
+            .toList();
+            
+        return ResponseEntity.ok(pedidosDTO);
+    }
+    
+    private PedidoUsuarioDTO convertToPedidoUsuarioDTO(Pedido pedido) {
+        PedidoUsuarioDTO dto = new PedidoUsuarioDTO();
+        dto.setId(pedido.getId());
+        dto.setFechaPedido(pedido.getFechaPedido());
+        dto.setEstado(pedido.getEstado());
+        dto.setTotal(pedido.getTotal());
+        dto.setMensajes(mensajePedidoRepository.findByPedidoIdOrderByFechaMensajeDesc(pedido.getId()));
+        return dto;
     }
 
     @GetMapping("/{id}")
@@ -64,22 +94,46 @@ public class OrderRestController {
         Usuario usuario = (Usuario) session.getAttribute("currentUser");
 
         if (usuario == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "No autenticado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
 
         try {
+            // Recargar el usuario desde la BD para evitar problemas de sesión
+            usuario = usuarioRepository.findByCorreo(usuario.getCorreo())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
             // Obtener el carrito de la sesión
             var cart = cartService.getCart();
 
-            if (cart.getItems().isEmpty()) {
+            if (cart == null || cart.getItems().isEmpty()) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("error", "El carrito está vacío");
                 return ResponseEntity.badRequest().body(error);
             }
 
-            // Crear el pedido
-            OrderForm orderForm = new OrderForm();
-            Pedido pedido = orderService.createOrder(cart, orderForm, usuario.getCorreo());
+            // Crear el pedido manualmente para evitar problemas de sesión
+            Pedido pedido = new Pedido();
+            pedido.setUsuario(usuario);
+            pedido.setEstado(EstadoPedido.PENDIENTE);
+
+            BigDecimal total = BigDecimal.ZERO;
+            for (var item : cart.getItems()) {
+                BigDecimal subtotal = item.getProduct().getPrecio()
+                        .multiply(BigDecimal.valueOf(item.getQuantity()));
+                total = total.add(subtotal);
+
+                DetallePedido detalle = new DetallePedido();
+                detalle.setProducto(item.getProduct());
+                detalle.setCantidad(item.getQuantity());
+                detalle.setPrecioUnitario(item.getProduct().getPrecio());
+                detalle.setSubtotal(subtotal);
+                pedido.addDetalle(detalle);
+            }
+
+            pedido.setTotal(total);
+            pedido = pedidoRepository.save(pedido);
 
             // Limpiar el carrito después de crear el pedido
             cartService.clear();
@@ -87,13 +141,14 @@ public class OrderRestController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Pedido creado exitosamente");
             response.put("id", pedido.getId());
-            response.put("status", "PENDING");
+            response.put("status", "PENDIENTE");
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace();
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Error al crear pedido: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 

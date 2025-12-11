@@ -88,7 +88,7 @@
                 <td>
                   <div class="btn-group btn-group-sm">
                     <router-link
-                      :to="`/admin/users/edit/${user.correo}`"
+                      :to="`/admin/users/edit/${encodeURIComponent(user.correo)}`"
                       class="btn btn-outline-primary"
                       title="Editar"
                     >
@@ -221,16 +221,14 @@ export default {
       if (!confirm(`¿Deseas ${action} privilegios de administrador a "${user.nombre}"?`)) return
 
       try {
-        let newRoles
+        let newRolesArr = getRolesArray(user.roles)
         if (hasAdmin) {
-          // Quitar ADMIN
-          newRoles = getRolesArray(user.roles)
-            .filter(r => r !== 'ADMIN')
-            .join(',')
+          newRolesArr = newRolesArr.filter(r => r !== 'ADMIN')
+          if (newRolesArr.length === 0) newRolesArr = ['USER']
         } else {
-          // Agregar ADMIN
-          newRoles = user.roles + ',ADMIN'
+          if (!newRolesArr.includes('ADMIN')) newRolesArr.push('ADMIN')
         }
+        const newRoles = newRolesArr.join(',')
 
         const updated = { ...user, roles: newRoles }
         await axios.put(`/api/users/${user.correo}`, updated)
@@ -299,4 +297,3 @@ export default {
   background-color: #f8f9fa;
 }
 </style>
-

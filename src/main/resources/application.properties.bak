@@ -1,0 +1,21 @@
+# --- CONFIGURACION DE LA BASE DE DATOS (DATASOURCE) ---
+spring.datasource.url=jdbc:mysql://localhost:3306/sistema_pedidos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.username=root
+spring.datasource.password=conde-lemon
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# --- CONFIGURACION DE JPA/HIBERNATE ---
+# Muestra las consultas SQL en la consola (bueno para depurar)
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# 'create': RECREAR tablas (solo para desarrollo inicial con datos de prueba)
+# Los datos existentes se BORRAN al reiniciar la aplicacion.
+# Cambiar a 'update' después de cargar datos iniciales
+spring.jpa.hibernate.ddl-auto=update
+
+# --- CONFIGURACION DEL SERVIDOR Y THYMELEAF ---
+# Desactiva la cache de Thymeleaf para ver cambios en HTML sin reiniciar.
+spring.thymeleaf.cache=false
+server.port=8080
+

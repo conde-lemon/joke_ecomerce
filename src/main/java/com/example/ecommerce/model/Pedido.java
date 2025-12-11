@@ -1,5 +1,6 @@
 package com.example.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,6 +41,7 @@ public class Pedido {
     private BigDecimal total;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<DetallePedido> detalles = new ArrayList<>();
 
     // --- MEJORA 2: Método de ayuda para sincronizar la relación ---

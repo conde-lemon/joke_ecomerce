@@ -48,6 +48,17 @@
             </div>
 
             <!-- Botones de acción -->
+            <div class="d-flex flex-column flex-md-row gap-3 justify-content-center mb-4">
+              <button @click="descargarBoleta" class="btn btn-success btn-lg">
+                <i class="bi bi-file-earmark-pdf me-2"></i>
+                Descargar Boleta
+              </button>
+              <button @click="descargarOrdenEnvio" class="btn btn-info btn-lg">
+                <i class="bi bi-file-earmark-text me-2"></i>
+                Descargar Orden de Envío
+              </button>
+            </div>
+
             <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
               <router-link to="/orders" class="btn btn-custom-primary btn-lg">
                 <i class="bi bi-list-ul me-2"></i>
@@ -76,6 +87,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import axios from '../config/axios'
 
 export default {
   name: 'Confirmation',
@@ -87,8 +99,62 @@ export default {
       orderId.value = route.query.orderId || 'XXXXXXXX'
     })
 
+    const descargarBoleta = async () => {
+      if (!orderId.value || orderId.value === 'XXXXXXXX') {
+        alert('ID de pedido no válido')
+        return
+      }
+
+      try {
+        const response = await axios.get(`/api/reports/boleta/${orderId.value}`, {
+          responseType: 'blob'
+        })
+
+        // Crear enlace temporal para descargar
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `boleta_${orderId.value}.pdf`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Error al descargar boleta:', error)
+        alert('Error al descargar la boleta. Por favor, intenta más tarde.')
+      }
+    }
+
+    const descargarOrdenEnvio = async () => {
+      if (!orderId.value || orderId.value === 'XXXXXXXX') {
+        alert('ID de pedido no válido')
+        return
+      }
+
+      try {
+        const response = await axios.get(`/api/reports/orden-envio/${orderId.value}`, {
+          responseType: 'blob'
+        })
+
+        // Crear enlace temporal para descargar
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `orden_envio_${orderId.value}.pdf`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Error al descargar orden de envío:', error)
+        alert('Error al descargar la orden de envío. Por favor, intenta más tarde.')
+      }
+    }
+
     return {
-      orderId
+      orderId,
+      descargarBoleta,
+      descargarOrdenEnvio
     }
   }
 }

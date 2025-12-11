@@ -13,6 +13,20 @@
 
   <main class="container my-4">
 
+    <!-- Mensaje de Error (sin perder sesión) -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Mensaje de Éxito -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <!-- Pasos visuales -->
     <div class="mb-4 text-center text-secondary">
       <div class="d-inline-flex align-items-center gap-3">

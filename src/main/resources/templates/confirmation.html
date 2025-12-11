@@ -18,6 +18,11 @@
     <h2 class="mt-3">¡Gracias por tu compra!</h2>
     <p class="lead text-muted">Tu pedido ha sido procesado con éxito.</p>
 
+    <!-- Número de pedido si está disponible -->
+    <div th:if="${orderId}" class="alert alert-info d-inline-block mt-3">
+      <strong>Número de Pedido:</strong> #<span th:text="${orderId}"></span>
+    </div>
+
     <div class="mt-4 d-flex gap-3 justify-content-center">
       <a class="btn btn-outline-primary" th:href="@{/orders}">Ver mis pedidos</a>
       <a class="btn btn-primary" th:href="@{/catalog}">Volver al catálogo</a>

@@ -5,7 +5,6 @@ import com.example.ecommerce.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -15,14 +14,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class AuthRestController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
@@ -34,7 +30,8 @@ public class AuthRestController {
 
         Usuario usuario = usuarioRepository.findByCorreo(email).orElse(null);
 
-        if (usuario == null || !passwordEncoder.matches(password, usuario.getContrasena())) {
+        // Comparación simple de contraseñas (sin encriptación)
+        if (usuario == null || !usuario.getContrasena().equals(password)) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Credenciales incorrectas");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
@@ -53,7 +50,7 @@ public class AuthRestController {
         userInfo.put("roles", usuario.getRoles());
 
         response.put("user", userInfo);
-        response.put("token", session.getId()); // Usar session ID como token simple
+        response.put("token", session.getId());
 
         return ResponseEntity.ok(response);
     }
@@ -75,8 +72,7 @@ public class AuthRestController {
                 return ResponseEntity.badRequest().body(error);
             }
 
-            // Encriptar contraseña
-            usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+            // Guardar contraseña SIN encriptar
             usuario.setFechaCreacion(LocalDateTime.now());
             usuario.setRoles("USER");
 

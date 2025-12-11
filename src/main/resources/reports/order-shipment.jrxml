@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ...existing code... -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+                                 http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+             name="order_shipment"
+             pageWidth="595"
+             pageHeight="842"
+             columnWidth="555"
+             leftMargin="20"
+             rightMargin="20"
+             topMargin="20"
+             bottomMargin="20"
+             whenNoDataType="AllSectionsNoDetail">
+
+    <!-- 1) Establecer locale por defecto a es_PE -->
+    <property name="net.sf.jasperreports.default.locale" value="es_PE"/>
+
+    <!-- ...existing code... (otros fields, parameters, title, etc.) ... -->
+
+    <!-- Declaración del field 'total' (asegúrate que coincide con tu datasource) -->
+    <field name="total" class="java.math.BigDecimal"/>
+    <!-- ...existing code... -->
+
+    <!-- Ejemplo: mostrar el total en el summary del reporte con patrón de moneda -->
+    <summary>
+        <band height="60">
+            <!-- ...existing summary content... -->
+
+            <textField pattern="¤ #,##0.00">
+                <reportElement x="350" y="10" width="180" height="20" uuid="total-textfield-uuid"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+
+            <!-- Etiqueta "Total:" a la izquierda del campo -->
+            <staticText>
+                <reportElement x="280" y="10" width="70" height="20" uuid="total-label-uuid"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total:]]></text>
+            </staticText>
+
+            <!-- ...existing summary content... -->
+        </band>
+    </summary>
+
+    <!-- ...existing code... -->
+</jasperReport>
+
